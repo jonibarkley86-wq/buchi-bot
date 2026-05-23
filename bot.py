@@ -4,8 +4,7 @@ import random
 import yt_dlp
 import os
 
-# የቦት ቶከን
-bot = telebot.TeleBot("8708361571:AAEZlQD8WWj--90lWrgNsINTKKe8lP4Juag")
+bot = telebot.TeleBot("8405392398:AAFcN5SpNwH3rRkHLFUZgPyEQ9LUq94UfzM")
 user_last_greeted = {}
 
 def get_greeting(hour):
@@ -20,35 +19,30 @@ def get_greeting(hour):
 def send_welcome(message):
     bot.reply_to(message, get_greeting((datetime.datetime.utcnow().hour + 3) % 24))
 
-@bot.message_handler(func=lambda message: message.text and message.text.startswith('http'))
+@bot.message_handler(func=lambda message: message.text.startswith('http'))
 def handle_link(message):
     chat_id = message.chat.id
-    
-    # ሰላምታ በቀን አንድ ጊዜ
     if user_last_greeted.get(chat_id) != datetime.date.today():
         bot.send_message(chat_id, get_greeting((datetime.datetime.utcnow().hour + 3) % 24))
         user_last_greeted[chat_id] = datetime.date.today()
     
-    msg = bot.reply_to(message, "✈️ ቪዲዮሽን እየበረርኩ ሄጄ ላምጣ፣ ጥቂት ጠብቂኝ...")
-    
+    msg = bot.reply_to(message, "✈️ ቪዲዮሽን በፍጥነት እያመጣሁልሽ ነው...")
     try:
+        # በፍጥነት ለማውረድ የሚያስችሉ ኦፕሽኖች
         ydl_opts = {
             'format': 'best', 
-            'outtmpl': f'video_{chat_id}.mp4', 
+            'outtmpl': 'video.mp4', 
             'noplaylist': True,
-            'quiet': True
+            'quiet': True,          # ሎግ እንዳይጽፍ ይረዳል
+            'no_warnings': True     # ማስጠንቀቂያዎችን በመዝለል ፍጥነት ይጨምራል
         }
-        
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([message.text])
         
-        video_path = f'video_{chat_id}.mp4'
-        with open(video_path, 'rb') as video:
+        with open('video.mp4', 'rb') as video:
             bot.send_video(chat_id, video)
-            
         bot.send_message(chat_id, "ይሄው የኔ ልዕልት! 😍")
-        os.remove(video_path)
-        
+        os.remove('video.mp4')
     except Exception as e:
         bot.reply_to(message, "አልተሳካም፣ ሊንኩን እንደገና ሞክሪ! 😢")
 
